@@ -1,5 +1,12 @@
 # Crypto Guardian
 
+## Screenshots
+
+### Graph & Key Metrics
+![Graph](public/screenshots/crypto-ss1.png)
+
+### Safety Score & Breakdown
+![Safety](public/screenshots/crypto-ss2.png)
 
 ## Table of Contents
 - [Overview](#overview)
