@@ -1,21 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import CryptoGraph from '../components/CryptoGraph';
 import SearchBar from '../components/SearchBar';
-import SafetyScore from '@/components/SafetyScore';
+import SafetyScore, { SafetyScoreBreakdown } from '@/components/SafetyScore';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
-import Image from 'next/image';
 
 const HomePage = () => {
-  const [selectedCoin, setSelectedCoin] = useState('bitcoin'); // Default to Bitcoin
-  const [timeframe, setTimeframe] = useState('1W'); // Default timeframe
+  const [selectedCoin, setSelectedCoin] = useState('bitcoin');
+  const [timeframe, setTimeframe] = useState('1W');
   const [coinData, setCoinData] = useState<any>(null);
   const commonCoins = ['Bitcoin', 'Ethereum', 'Solana', 'Cardano', 'Ripple'];
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedCoin(e.target.value);
-  };
 
   const handleCoinClick = (coin: string) => {
     setSelectedCoin(coin);
@@ -30,34 +26,20 @@ const HomePage = () => {
       try {
         const response = await fetch(`/api/coingecko?endpoint=/coins/${selectedCoin.toLowerCase()}`);
         const data = await response.json();
-
         if (data.error) {
           throw new Error(data.error);
         }
-
         setCoinData(data);
       } catch (error) {
         console.error('Error fetching coin metrics:', error);
       }
     };
-
     fetchCoinMetrics();
   }, [selectedCoin]);
 
-  useEffect(() => {
-    if (coinData) {
-      console.log('Debug Scores:', {
-        liquidityScore: coinData.liquidity_score,
-        developerScore: coinData.developer_score,
-        communityScore: coinData.community_score,
-        rawData: coinData // Log full response
-      });
-    }
-  }, [coinData]);
-
   return (
     <div className="flex flex-col min-h-screen bg-white text-black">
-      {/* Logo, Search, and Common Coins Section */}
+      {/* Logo and Search Section */}
       <div className="flex items-center justify-between p-8">
         <div className="flex items-center">
           <Image
@@ -95,11 +77,11 @@ const HomePage = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 p-8">
+      <div className="flex p-8">
         {/* Left Panel - Metrics and Safety Score */}
-        <div className="w-1/3 pr-8 space-y-8">
+        <div className="w-1/3 pr-8">
           {/* Key Metrics Card */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
             <h2 className="text-xl font-bold mb-4">Key Metrics</h2>
             <div className="space-y-2">
               <MetricRow 
@@ -135,35 +117,44 @@ const HomePage = () => {
           </div>
 
           {/* Safety Score Component */}
-          {coinData && (
-            <SafetyScore
-              metrics={{
-                marketCap: coinData?.market_data?.market_cap?.usd || 0,
-                volume24h: coinData?.market_data?.total_volume?.usd || 0,
-                twitterFollowers: coinData?.community_data?.twitter_followers || 0,
-                developerData: coinData?.developer_data,
-                priceChangePercentage24h: coinData?.market_data?.price_change_percentage_24h || 0,
-                circulatingSupply: coinData?.market_data?.circulating_supply || 0,
-                totalSupply: coinData?.market_data?.total_supply || 0
-              }}
-            />
-          )}
+          <SafetyScore 
+            metrics={{
+              marketCap: coinData?.market_data?.market_cap?.usd || 0,
+              volume24h: coinData?.market_data?.total_volume?.usd || 0,
+              twitterFollowers: coinData?.community_data?.twitter_followers || 0,
+              developerData: coinData?.developer_data,
+              priceChangePercentage24h: coinData?.market_data?.price_change_percentage_24h || 0,
+              circulatingSupply: coinData?.market_data?.circulating_supply || 0,
+              totalSupply: coinData?.market_data?.total_supply || 0
+            }} 
+          />
         </div>
 
-        {/* Right Panel - Price Chart */}
+        {/* Right Panel - Chart and Score Breakdown */}
         <div className="w-2/3">
-          <div className="flex justify-center mb-4">
-            {['1D', '1W', '1M', '1Y', 'All'].map((timeframeOption) => (
-              <button
-                key={timeframeOption}
-                onClick={() => handleTimeframeChange(timeframeOption)}
-                className={`bg-gray-200 hover:bg-gray-300 text-black font-semibold py-2 px-4 rounded mx-2 ${timeframe === timeframeOption ? 'bg-gray-300' : ''}`}
-              >
-                {timeframeOption}
-              </button>
-            ))}
+          {/* Chart Section */}
+          <div className="mb-8">
+            {/* Chart Controls */}
+            <div className="flex justify-center mb-4">
+              {['1D', '1W', '1M', '1Y', 'All'].map((timeframeOption) => (
+                <button
+                  key={timeframeOption}
+                  onClick={() => handleTimeframeChange(timeframeOption)}
+                  className={`bg-gray-200 hover:bg-gray-300 text-black font-semibold py-2 px-4 rounded mx-2 ${timeframe === timeframeOption ? 'bg-gray-300' : ''}`}
+                >
+                  {timeframeOption}
+                </button>
+              ))}
+            </div>
+
+            {/* Chart */}
+            <div className="mb-6">
+              <CryptoGraph coinId={selectedCoin.toLowerCase()} timeframe={timeframe} />
+            </div>
           </div>
-          <CryptoGraph coinId={selectedCoin.toLowerCase()} timeframe={timeframe} />
+
+          {/* Score Breakdown Component */}
+          <SafetyScoreBreakdown />
         </div>
       </div>
     </div>
@@ -177,13 +168,6 @@ interface MetricRowProps {
 }
 
 const MetricRow: React.FC<MetricRowProps> = ({ label, value, isPercentage }) => {
-  let displayValue = value.toString();
-  if (label === "Market Cap" || label === "Current Price" || label === "24h Volume") {
-    displayValue = `${value}`;
-  } else if (displayValue.startsWith('$')) {
-    displayValue = displayValue.substring(1);
-  }
-
   const valueClass = isPercentage
     ? `font-medium ${parseFloat(value.toString()) >= 0 ? 'text-green-600' : 'text-red-600'}`
     : 'font-medium';
@@ -191,7 +175,7 @@ const MetricRow: React.FC<MetricRowProps> = ({ label, value, isPercentage }) => 
   return (
     <div className="flex justify-between items-center py-1">
       <span className="text-gray-600">{label}</span>
-      <span className={valueClass}>{displayValue}</span>
+      <span className={valueClass}>{value}</span>
     </div>
   );
 };
