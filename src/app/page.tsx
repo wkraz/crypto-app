@@ -5,6 +5,7 @@ import CryptoGraph from '../components/CryptoGraph';
 import SearchBar from '../components/SearchBar';
 import SafetyScore from '@/components/SafetyScore';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
+import Image from 'next/image';
 
 const HomePage = () => {
   const [selectedCoin, setSelectedCoin] = useState('bitcoin'); // Default to Bitcoin
@@ -55,26 +56,41 @@ const HomePage = () => {
   }, [coinData]);
 
   return (
-    <div className="flex flex-col h-screen bg-white text-black">
-      {/* Top Half: Search Bar and Common Coins */}
-      <div className="flex flex-col items-center justify-center p-8">
-        <div className="mb-8 w-full max-w-md">
-          <SearchBar 
-            defaultCoin={selectedCoin} 
-            onCoinSelect={(coinId) => setSelectedCoin(coinId)} 
+    <div className="flex flex-col min-h-screen bg-white text-black">
+      {/* Logo, Search, and Common Coins Section */}
+      <div className="flex items-center justify-between p-8">
+        <div className="flex items-center">
+          <Image
+            src="/CryptoGuardian.png"
+            alt="Crypto Guardian Logo"
+            width={80}
+            height={80}
+            className="rounded-lg"
           />
+          <h1 className="ml-4 text-4xl font-bold text-gray-800">
+            Crypto Guardian
+          </h1>
         </div>
         
-        <div className="flex space-x-4 mb-8">
-          {commonCoins.map((coin) => (
-            <button
-              key={coin}
-              onClick={() => handleCoinClick(coin)}
-              className="bg-gray-200 hover:bg-gray-300 text-black font-semibold py-2 px-4 rounded"
-            >
-              {coin}
-            </button>
-          ))}
+        <div className="flex items-center space-x-8">
+          <div className="w-96">
+            <SearchBar 
+              defaultCoin={selectedCoin} 
+              onCoinSelect={(coinId) => setSelectedCoin(coinId)} 
+            />
+          </div>
+          
+          <div className="flex space-x-2">
+            {commonCoins.map((coin) => (
+              <button
+                key={coin}
+                onClick={() => handleCoinClick(coin)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-1.5 px-3 rounded-md transition-colors"
+              >
+                {coin}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -114,10 +130,6 @@ const HomePage = () => {
                 label="7d Price Change" 
                 value={formatPercentage(coinData?.market_data?.price_change_percentage_7d || 0)}
                 isPercentage={true}
-              />
-              <MetricRow 
-                label="Liquidity Score" 
-                value={formatNumber(coinData?.liquidity_score || 0)}
               />
             </div>
           </div>

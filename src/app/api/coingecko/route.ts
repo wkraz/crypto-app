@@ -66,7 +66,9 @@ export async function GET(request: Request) {
     const coinId = coinMatch ? coinMatch[1] : null;
 
     let apiUrl: string;
-    if (endpoint.includes('market_chart')) {
+    if (coinId && !endpoint.includes('market_chart')) {
+      apiUrl = `${BASE_URL}/coins/${coinId}?localization=false&market_data=true&community_data=true&developer_data=true&sparkline=true`;
+    } else if (endpoint.includes('market_chart')) {
       const days = searchParams.get('days') || '7';
       apiUrl = `${BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}days=${days}`;
     } else {

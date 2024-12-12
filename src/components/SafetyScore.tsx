@@ -114,36 +114,49 @@ const getLetterGrade = (score: number): string => {
 };
 
 const ScoreComponent: React.FC<ScoreComponentProps> = ({ label, score, maxScore, detail }) => (
-  <div className="flex items-center justify-between">
-    <div>
-      <span className="font-medium">{label}</span>
+  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+    <div className="flex-1">
+      <span className="font-medium text-gray-800">{label}</span>
       <span className="text-sm text-gray-500 ml-2">({detail})</span>
     </div>
-    <div className="font-medium">
-      {score.toFixed(1)}/{maxScore}
+    <div className="flex items-center">
+      <div className="w-16 h-2 bg-gray-200 rounded-full mr-3">
+        <div 
+          className={`h-full rounded-full ${
+            (score/maxScore) >= 0.7 ? 'bg-green-500' : 
+            (score/maxScore) >= 0.5 ? 'bg-yellow-500' : 
+            'bg-red-500'
+          }`}
+          style={{ width: `${(score/maxScore) * 100}%` }}
+        />
+      </div>
+      <span className="font-medium text-gray-800 w-16 text-right">
+        {score.toFixed(1)}/{maxScore}
+      </span>
     </div>
   </div>
 );
 
 const SafetyScore: React.FC<SafetyScoreProps> = ({ metrics }) => {
-  const {
-    score,
-    breakdown
-  } = calculateSafetyScore(metrics);
+  const { score, breakdown } = calculateSafetyScore(metrics);
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Safety Score</h2>
-        <div className="text-2xl font-bold">
-          {score}/100
-          <span className="ml-2 text-sm text-gray-500">
-            ({getLetterGrade(score)})
+    <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-gray-800">Safety Score</h2>
+        <div className="flex items-center">
+          <div className="text-3xl font-bold text-gray-800">{score}</div>
+          <div className="text-lg text-gray-500 ml-1">/100</div>
+          <span className="ml-3 px-3 py-1 text-sm font-semibold rounded-full bg-opacity-10 
+            ${score >= 70 ? 'bg-green-100 text-green-800' : 
+              score >= 50 ? 'bg-yellow-100 text-yellow-800' : 
+              'bg-red-100 text-red-800'}">
+            {getLetterGrade(score)}
           </span>
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4 mb-8">
         <ScoreComponent 
           label="Market Cap" 
           score={breakdown.marketCapScore} 
@@ -157,16 +170,16 @@ const SafetyScore: React.FC<SafetyScoreProps> = ({ metrics }) => {
           detail={`${(metrics.circulatingSupply / metrics.totalSupply * 100).toFixed(1)}% circulating`}
         />
         <ScoreComponent 
-          label="Community Score" 
-          score={breakdown.communityScore} 
-          maxScore={15}
-          detail={`Score: ${breakdown.communityScore.toFixed(2)}/1`}
-        />
-        <ScoreComponent 
           label="Developer Activity" 
           score={breakdown.developerScore} 
           maxScore={20}
-          detail={`Score: ${breakdown.developerScore.toFixed(2)}/1`}
+          detail={`${metrics.developerData?.commit_count_4_weeks || 0} commits (4w)`}
+        />
+        <ScoreComponent 
+          label="Community Score" 
+          score={breakdown.communityScore} 
+          maxScore={15}
+          detail={`${formatNumber(metrics.twitterFollowers || 0)} followers`}
         />
         <ScoreComponent 
           label="Price Stability" 
@@ -174,34 +187,39 @@ const SafetyScore: React.FC<SafetyScoreProps> = ({ metrics }) => {
           maxScore={15}
           detail={`${formatPercentage(metrics.priceChangePercentage24h)} (24h)`}
         />
-        <div className="mt-4">
-          <h3 className="font-semibold">Rug Pull Risk Assessment</h3>
-          <div className="mt-2 text-sm">
-            <ScoreComponent 
-              label="Supply Distribution" 
-              score={breakdown.supplyScore} 
-              maxScore={25}
-              detail={`${(metrics.circulatingSupply / metrics.totalSupply * 100).toFixed(1)}% circulating`}
-            />
-            {metrics.tokenLockupPercentage && (
-              <div className="mt-1">
-                Token Lockup: {metrics.tokenLockupPercentage}%
-                {metrics.vestingPeriodCompleted ? ' (Completed)' : ' (In Progress)'}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
-      <div className="mt-4 text-sm text-gray-500">
-        <p>Score Breakdown:</p>
-        <ul className="list-disc list-inside mt-2">
-          <li>Market Cap (25%): Higher market capitalization indicates greater adoption and reduced manipulation risk</li>
-          <li>Supply Distribution (25%): Well-distributed token supply reduces centralization and whale manipulation risks</li>
-          <li>Community (15%): Strong community engagement suggests legitimate project with long-term support</li>
-          <li>Developer Activity (20%): Active development indicates project maintenance and growth</li>
-          <li>Price Stability (15%): Lower price volatility suggests market maturity and reduced speculation</li>
+      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <p className="font-medium text-gray-800 mb-3">Score Breakdown:</p>
+        <ul className="space-y-2 text-sm text-gray-600">
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span><strong>Market Cap (25%):</strong> Higher market capitalization indicates greater adoption and reduced manipulation risk</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span><strong>Supply Distribution (25%):</strong> Well-distributed token supply reduces centralization and rug pull risks</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span><strong>Developer Activity (20%):</strong> Active development indicates project maintenance and growth</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span><strong>Community (15%):</strong> Strong community engagement suggests legitimate project with long-term support</span>
+          </li>
+          <li className="flex items-start">
+            <span className="mr-2">•</span>
+            <span><strong>Price Stability (15%):</strong> Lower price volatility suggests market maturity and reduced speculation</span>
+          </li>
         </ul>
+        <div className="mt-4 p-3 bg-red-50 rounded-lg">
+          <p className="text-sm text-red-800">
+            <strong>Rug Pull Risk:</strong> A safety score below 50 indicates higher risk of a rug pull. 
+            Low supply distribution, minimal developer activity, and weak community engagement are common 
+            red flags for potential scams.
+          </p>
+        </div>
       </div>
     </div>
   );
