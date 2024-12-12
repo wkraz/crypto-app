@@ -1,4 +1,5 @@
-# Crypto Price Graph Application
+# Crypto Guardian
+
 
 ## Table of Contents
 - [Overview](#overview)
@@ -11,34 +12,43 @@
 - [License](#license)
 
 ## Overview
-The Crypto Price Graph Application is a web-based tool that allows users to visualize the price trends of various cryptocurrencies. Users can search for specific coins, view common cryptocurrencies, and analyze price data over different timeframes. This project demonstrates my skills in React, Next.js, and API integration.
+Crypto Guardian is a web-based tool that allows users to visualize the price trends of various cryptocurrencies while assessing their safety and potential for rug pulls. Users can input a cryptocurrency, view its price graph, and analyze key metrics to make informed investment decisions.
 
 ## Features
-- **Search Bar**: Users can search for any cryptocurrency to display its price graph.
-- **Common Coins**: Quick access to popular cryptocurrencies like Bitcoin, Ethereum, and Solana.
-- **Dynamic Graph**: View price trends over different timeframes (1D, 1W, 1M, 1Y, All).
-- **Key Metrics**: Display essential metrics such as market cap, current price, 7-day price trend, and liquidity.
-- **Safety Score**: Uses key metrics to determine the relative safety of a coin, and explains the rationale behind it to the user.
-- **Predictive Metrics**: Features many comprehensive prediction metrics that the user can choose between. 
+- **User Input**: Users can input a cryptocurrency to display its price graph.
+- **Dynamic Timeframes**: Choose between 1D, 1W, 1M, 1Y, and All-time to view price trends.
+- **Key Metrics**: Display essential metrics such as market cap, liquidity, and 7-day price trend.
+- **Safety Score**: Calculate a safety score based on various metrics, including:
+  - Token vesting schedules: Check for locked tokens and distribution patterns.
+  - Liquidity metrics: Look for locked liquidity pools.
+  - Volume trends: Sudden high volumes often indicate manipulation.
+  - Developer activity: Analyze GitHub commits or public updates.
+- **Predictive Metrics**: Implement predictive models in Python and serve predictions via Flask, including:
+  - Linear Regression: Simple trend analysis.
+  - LSTM (Long Short-Term Memory): Better for time-series prediction.
+  - ARIMA (Auto-Regressive Integrated Moving Average): Focus on statistical analysis.
+- **Graphical Predictions**: Display results on a graph in green based on the previous range and future range, allowing users to visualize potential future trends.
 
 ## Technologies Used
 - **Frontend**: 
   - React
   - Next.js
   - Tailwind CSS
+- **Backend**: 
+  - Node.js for API logic
+  - Flask for serving predictive models
 - **API**: 
   - CoinGecko API for cryptocurrency data
-- **Development Tools**: 
-  - Node.js
-  - npm
+- **Machine Learning**: 
+  - Python for predictive metrics (LSTM, ARIMA, Prophet, GRU, Time Series Transformer)
 
 ## Installation
 To run this project locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/wkraz/crypto-app.git
-   cd crypto-app
+   git clone https://github.com/yourusername/crypto-guardian.git
+   cd crypto-guardian
    ```
 
 2. Install the dependencies:
@@ -58,8 +68,7 @@ To run this project locally, follow these steps:
 - Click on any of the common coins displayed below the search bar for quick access.
 - Select a timeframe to view the price graph.
 - Key metrics will be displayed on the left side of the graph.
-- The safety score will be displayed under the key metrics. Click on the safety score section to see an explanation of the numbers that went into the calculation.
-- Click on `predict` to see a list of predictive metrics that directly extend the graph based on trained ML algorithms.
+- Click on the safety score to see detailed metrics and explanations.
 
 ## API Integration
 This application integrates with the CoinGecko API to fetch real-time cryptocurrency data. The API endpoints used include:
