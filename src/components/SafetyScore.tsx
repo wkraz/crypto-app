@@ -163,7 +163,7 @@ const SafetyScore: React.FC<SafetyScoreProps> = ({ metrics }) => {
           label="Market Cap" 
           score={breakdown.marketCapScore || 0} 
           maxScore={25}
-          detail={`$${formatNumber(metrics.marketCap)}`}
+          detail={`${formatNumber(metrics.marketCap)}`}
         />
         <ScoreComponent 
           label="Supply Distribution" 
